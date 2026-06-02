@@ -1,5 +1,26 @@
 const apiBase = '/api';
 
+// Views and navigation
+const views = document.querySelectorAll('.view');
+const navLinks = document.querySelectorAll('.nav-link');
+const menuBtn = document.getElementById('menuBtn');
+
+function showView(name) {
+  views.forEach((v) => (v.style.display = v.id === `view-${name}` ? 'block' : 'none'));
+  location.hash = `#${name}`;
+}
+
+function initRouting() {
+  const hash = (location.hash || '#home').replace('#', '');
+  showView(hash);
+  navLinks.forEach((btn) => btn.addEventListener('click', () => showView(btn.dataset.view)));
+  document.querySelectorAll('[data-view]').forEach((el) => el.addEventListener('click', (e) => showView(e.currentTarget.dataset.view)));
+  menuBtn && menuBtn.addEventListener('click', () => {
+    document.querySelector('.nav').classList.toggle('open');
+  });
+}
+
+// Elements
 const form = document.getElementById('formPreco');
 const produtoNome = document.getElementById('produtoNome');
 const lojaNome = document.getElementById('lojaNome');
@@ -16,6 +37,7 @@ const btnCancelar = document.getElementById('btnCancelar');
 let editarId = null;
 
 function exibirMensagem(elemento, texto, tipo = 'info') {
+  if (!elemento) return;
   elemento.textContent = texto;
   elemento.classList.add('ativo');
   elemento.style.background = tipo === 'erro' ? 'rgba(231, 76, 60, 0.1)' : 'rgba(44, 123, 229, 0.08)';
@@ -23,11 +45,13 @@ function exibirMensagem(elemento, texto, tipo = 'info') {
 }
 
 function limparMensagem(elemento) {
+  if (!elemento) return;
   elemento.textContent = '';
   elemento.classList.remove('ativo');
 }
 
 function atualizarTabela(precos) {
+  if (!precosTabela) return;
   precosTabela.innerHTML = '';
   totalRegistros.textContent = `${precos.length} registro(s)`;
 
@@ -41,14 +65,18 @@ function atualizarTabela(precos) {
     row.innerHTML = `
       <td>${preco.produto}</td>
       <td>${preco.loja}</td>
-      <td>R$ ${preco.valor.toFixed(2)}</td>
+      <td>R$ ${Number(preco.valor).toFixed(2)}</td>
       <td>
-        <button class="action-button" onclick="editarPreco(${preco.id})">Editar</button>
-        <button class="action-button danger" onclick="deletarPreco(${preco.id})">Excluir</button>
+        <button class="action-button" data-edit="${preco.id}">Editar</button>
+        <button class="action-button danger" data-delete="${preco.id}">Excluir</button>
       </td>
     `;
     precosTabela.appendChild(row);
   });
+
+  // attach events
+  precosTabela.querySelectorAll('[data-edit]').forEach((b) => b.addEventListener('click', (e) => editarPreco(Number(e.currentTarget.dataset.edit))));
+  precosTabela.querySelectorAll('[data-delete]').forEach((b) => b.addEventListener('click', (e) => deletarPreco(Number(e.currentTarget.dataset.delete))));
 }
 
 async function carregarPrecos() {
@@ -56,8 +84,10 @@ async function carregarPrecos() {
     const resposta = await fetch(`${apiBase}/precos`);
     const dados = await resposta.json();
     atualizarTabela(dados);
+    return dados;
   } catch (erro) {
     exibirMensagem(mensagemFormulario, 'Falha ao carregar preços. Tente novamente.', 'erro');
+    return [];
   }
 }
 
@@ -81,13 +111,14 @@ async function comparar() {
 
     if (dados.length === 0) {
       resultadoComparacao.innerHTML = '<p>Nenhum preço encontrado para esse produto.</p>';
+      showView('results');
       return;
     }
 
     const lista = document.createElement('ul');
     dados.forEach((item) => {
       const itemLi = document.createElement('li');
-      itemLi.textContent = `${item.loja} - R$ ${item.valor.toFixed(2)}`;
+      itemLi.textContent = `${item.loja} - R$ ${Number(item.valor).toFixed(2)}`;
       lista.appendChild(itemLi);
     });
 
@@ -97,10 +128,12 @@ async function comparar() {
     const destaque = document.createElement('div');
     destaque.className = 'mensagem ativo';
     destaque.style.background = 'rgba(46, 204, 113, 0.12)';
-    destaque.textContent = `Melhor preço: ${melhor.loja} - R$ ${melhor.valor.toFixed(2)}`;
+    destaque.textContent = `Melhor preço: ${melhor.loja} - R$ ${Number(melhor.valor).toFixed(2)}`;
     resultadoComparacao.appendChild(destaque);
+    showView('results');
   } catch (erro) {
     resultadoComparacao.innerHTML = '<p>Não foi possível buscar os preços. Tente novamente.</p>';
+    showView('results');
   }
 }
 
@@ -143,8 +176,9 @@ async function salvarPreco(event) {
     }
 
     limparFormulario();
-    carregarPrecos();
+    await carregarPrecos();
     exibirMensagem(mensagemFormulario, editarId ? 'Registro atualizado com sucesso.' : 'Produto salvo com sucesso.');
+    showView('home');
   } catch (erro) {
     exibirMensagem(mensagemFormulario, erro.message, 'erro');
   }
@@ -155,11 +189,12 @@ function limparFormulario() {
   produtoNome.value = '';
   lojaNome.value = '';
   precoValor.value = '';
-  btnSalvar.textContent = 'Salvar';
+  const btnSalvar = document.getElementById('btnSalvar');
+  if (btnSalvar) btnSalvar.textContent = 'Salvar';
   limparMensagem(mensagemFormulario);
 }
 
-window.editarPreco = async function (id) {
+async function editarPreco(id) {
   try {
     const resposta = await fetch(`${apiBase}/precos`);
     const dados = await resposta.json();
@@ -174,14 +209,16 @@ window.editarPreco = async function (id) {
     produtoNome.value = item.produto;
     lojaNome.value = item.loja;
     precoValor.value = item.valor;
-    btnSalvar.textContent = 'Atualizar';
+    const btnSalvar = document.getElementById('btnSalvar');
+    if (btnSalvar) btnSalvar.textContent = 'Atualizar';
+    showView('add');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } catch (erro) {
     exibirMensagem(mensagemFormulario, 'Erro ao carregar registro para edição.', 'erro');
   }
-};
+}
 
-window.deletarPreco = async function (id) {
+async function deletarPreco(id) {
   if (!confirm('Deseja realmente excluir este preço?')) return;
 
   try {
@@ -191,15 +228,17 @@ window.deletarPreco = async function (id) {
       throw new Error(dados.erro || 'Falha ao excluir.');
     }
 
-    carregarPrecos();
+    await carregarPrecos();
     exibirMensagem(mensagemFormulario, 'Registro excluído com sucesso.');
   } catch (erro) {
     exibirMensagem(mensagemFormulario, erro.message, 'erro');
   }
-};
+}
 
-btnComparar.addEventListener('click', comparar);
-form.addEventListener('submit', salvarPreco);
-btnCancelar.addEventListener('click', limparFormulario);
+// init
+initRouting();
+btnComparar && btnComparar.addEventListener('click', comparar);
+form && form.addEventListener('submit', salvarPreco);
+btnCancelar && btnCancelar.addEventListener('click', limparFormulario);
 
 carregarPrecos();
