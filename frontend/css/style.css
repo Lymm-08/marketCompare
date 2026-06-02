@@ -64,18 +64,19 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 24px;
 }
 
 .device-frame {
-  width: 940px;
-  height: 520px;
+  width: min(940px, 96vw);
+  height: min(520px, 86vh);
   background: #0f1720;
   border-radius: 40px;
   padding: 36px;
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
 }
 
 /* mobile frame inside the device */
@@ -86,6 +87,7 @@ body {
   border-radius: 18px;
   padding: 18px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+  margin: 0 auto;
 }
 
 .mobile-top {
