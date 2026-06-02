@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Adicionar Produto / Preço</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body class="proto-bg">
+  <div class="device-frame">
+    <main class="mobile-frame">
+      <header class="mobile-top">
+        <div class="icon">☰</div>
+        <div class="icon">✉</div>
+      </header>
+
+      <section class="mobile-card">
+        <h2>Adicionar Novo Produto</h2>
+        <form id="formPreco">
+          <input id="produtoNome" name="produto" type="text" placeholder="Nome do Produto" />
+          <input id="lojaNome" name="loja" type="text" placeholder="Nome da Loja" />
+          <input id="precoValor" name="valor" type="number" min="0" step="0.01" placeholder="Preço (R$)" />
+          <div class="actions">
+            <button type="submit" id="btnSalvar">Salvar</button>
+          </div>
+          <div id="mensagemFormulario" class="mensagem"></div>
+        </form>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

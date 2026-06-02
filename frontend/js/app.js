@@ -94,61 +94,55 @@ async function carregarPrecos() {
 async function comparar() {
   const termo = produtoBusca.value.trim();
   limparMensagem(mensagemBusca);
-  resultadoComparacao.innerHTML = '';
-
   if (!termo) {
     exibirMensagem(mensagemBusca, 'Digite o nome do produto para comparar.', 'erro');
     return;
   }
+  // navegar para a página de resultados com o termo como query param
+  window.location.href = `/paginas/resultados-da-comparacao.html?nome=${encodeURIComponent(termo)}`;
+}
 
+async function renderComparisonByTerm(termo) {
+  const container = document.getElementById('resultadoComparacao');
+  if (!container) return;
+  container.innerHTML = '';
   try {
     const resposta = await fetch(`${apiBase}/precos/comparar?nome=${encodeURIComponent(termo)}`);
     const dados = await resposta.json();
 
     if (!resposta.ok) {
-      throw new Error(dados.erro || 'Erro ao buscar comparação.');
-    }
-
-    if (dados.length === 0) {
-      resultadoComparacao.innerHTML = '<p>Nenhum preço encontrado para esse produto.</p>';
-      showView('results');
+      container.innerHTML = '<p>Erro ao buscar comparação.</p>';
       return;
     }
 
-    // lista de ofertas
+    if (!dados || dados.length === 0) {
+      container.innerHTML = '<p>Nenhum preço encontrado para esse produto.</p>';
+      return;
+    }
+
     const lista = document.createElement('ul');
     dados.forEach((item) => {
-      const itemLi = document.createElement('li');
-      itemLi.textContent = `${item.loja} - R$ ${Number(item.valor).toFixed(2)}`;
-      lista.appendChild(itemLi);
+      const li = document.createElement('li');
+      li.textContent = `${item.loja} - R$ ${Number(item.valor).toFixed(2)}`;
+      lista.appendChild(li);
     });
+    container.appendChild(lista);
 
-    // melhor preço (primeiro da lista ordenada asc)
     const melhor = dados[0];
-
-    // calcular economia: diferença entre maior e menor encontrado
     const valores = dados.map((d) => Number(d.valor));
-    const maior = Math.max(...valores);
-    const menor = Math.min(...valores);
-    const economia = (maior - menor).toFixed(2);
-
-    resultadoComparacao.innerHTML = '';
-    resultadoComparacao.appendChild(lista);
+    const economia = (Math.max(...valores) - Math.min(...valores)).toFixed(2);
 
     const destaque = document.createElement('div');
     destaque.className = 'melhor-preco-box';
     destaque.innerHTML = `<strong>Melhor Preço: ${melhor.loja} - R$ ${Number(melhor.valor).toFixed(2)}</strong>`;
-    resultadoComparacao.appendChild(destaque);
+    container.appendChild(destaque);
 
     const economiaBox = document.createElement('div');
     economiaBox.className = 'economia-box';
-    economiaBox.innerHTML = `Você economiza R$ ${economia} comprando na ${melhor.loja}!`;
-    resultadoComparacao.appendChild(economiaBox);
-
-    showView('results');
-  } catch (erro) {
-    resultadoComparacao.innerHTML = '<p>Não foi possível buscar os preços. Tente novamente.</p>';
-    showView('results');
+    economiaBox.textContent = `Você economiza R$ ${economia} comprando na ${melhor.loja}!`;
+    container.appendChild(economiaBox);
+  } catch (err) {
+    container.innerHTML = '<p>Não foi possível buscar os preços. Tente novamente.</p>';
   }
 }
 
@@ -257,3 +251,10 @@ form && form.addEventListener('submit', salvarPreco);
 btnCancelar && btnCancelar.addEventListener('click', limparFormulario);
 
 carregarPrecos();
+
+// Se estivermos na página de resultados com query param, renderiza automaticamente
+if (location.pathname.endsWith('resultados-da-comparacao.html')) {
+  const params = new URLSearchParams(location.search);
+  const nome = (params.get('nome') || '').trim();
+  if (nome) renderComparisonByTerm(nome);
+}
