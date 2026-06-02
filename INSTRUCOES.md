@@ -65,3 +65,65 @@ Este projeto já tem a interface e a API básica funcionando em memória. Há al
 - Adicionar validações adicionais no frontend para evitar entradas inválidas.
 - Criar uma página de administração para visualizar produtos e lojas separadamente.
 - Incluir testes automatizados para rotas e modelos.
+
+## O que é necessário para popular o banco (lista de verificação)
+
+1. Ter o MySQL instalado e em funcionamento (local ou remoto).
+2. Criar o banco de dados (por exemplo `comparador`) e executar o script `database/schema.sql`.
+3. Criar o arquivo `backend/.env` com as credenciais de conexão (este arquivo NÃO deve ser commitado). Use `backend/.env.example` como modelo.
+4. (Opcional) Ajustar permissões do usuário do MySQL para permitir `INSERT/UPDATE/DELETE` nas tabelas.
+5. Popular com dados iniciais — duas opções abaixo:
+    - Executar o arquivo `database/sample_data.sql` (exemplo adicionado neste repositório).
+    - Usar a API HTTP para criar registros via `POST /api/precos` (exemplos de curl abaixo).
+
+## Exemplos: executar script SQL
+
+No terminal MySQL:
+```sql
+SOURCE C:/caminho/para/seu/projeto/database/schema.sql;
+SOURCE C:/caminho/para/seu/projeto/database/sample_data.sql;
+```
+
+## Exemplos: chamadas HTTP para adicionar preços
+
+1) Adicionar um preço via curl (cria produto/loja automaticamente se não existirem):
+```bash
+curl -X POST http://localhost:3000/api/precos \
+   -H "Content-Type: application/json" \
+   -d '{"produto":"Arroz","loja":"Mercado A","valor":19.90}'
+```
+
+2) Editar um preço existente (substitua :id pelo id do registro):
+```bash
+curl -X PUT http://localhost:3000/api/precos/:id \
+   -H "Content-Type: application/json" \
+   -d '{"produto":"Arroz","loja":"Mercado B","valor":18.50}'
+```
+
+3) Excluir um preço:
+```bash
+curl -X DELETE http://localhost:3000/api/precos/:id
+```
+
+## O que eu preciso de você para eu popular o banco por você
+
+- Credenciais de acesso ao MySQL (host, usuário, senha, nome do banco, porta). Se não quiser passar credenciais aqui, eu posso gerar um arquivo `database/sample_data.sql` e instruções para você executar localmente.
+- Decidir se deseja que eu execute os inserts automaticamente (preciso de acesso ao banco), ou se prefere executar os comandos manualmente seguindo as instruções.
+
+## Como abrir o projeto no navegador (passo a passo rápido)
+
+1. Instale dependências (uma vez):
+```bash
+cd C:\Users\Aluno\TCC-comparador-de-precos
+npm install
+```
+2. Inicie o servidor (dev):
+```bash
+npm run dev
+```
+3. Abra no navegador:
+```
+http://localhost:3000
+```
+
+OBS: Sem `backend/.env` o sistema usa armazenamento em memória (boa opção para testar visualmente). Recarregue a página após enviar/editar dados via formulário.
