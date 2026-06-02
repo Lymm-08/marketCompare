@@ -1,48 +1,64 @@
 const produtoModelo = require('../modelos/produtoModelo');
 
-exports.listarProdutos = (req, res) => {
-  const produtos = produtoModelo.listarProdutos();
-  res.json(produtos);
+exports.listarProdutos = async (req, res) => {
+  try {
+    const produtos = await produtoModelo.listarProdutos();
+    res.json(produtos);
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao listar produtos.' });
+  }
 };
 
-exports.criarProduto = (req, res) => {
-  const { nome } = req.body;
-  if (!nome || !nome.trim()) {
-    return res.status(400).json({ erro: 'O nome do produto é obrigatório.' });
-  }
+exports.criarProduto = async (req, res) => {
+  try {
+    const { nome } = req.body;
+    if (!nome || !nome.trim()) {
+      return res.status(400).json({ erro: 'O nome do produto é obrigatório.' });
+    }
 
-  const produto = produtoModelo.buscarPorNome(nome.trim());
-  if (produto) {
-    return res.status(409).json({ erro: 'Já existe um produto com esse nome.' });
-  }
+    const produto = await produtoModelo.buscarPorNome(nome.trim());
+    if (produto) {
+      return res.status(409).json({ erro: 'Já existe um produto com esse nome.' });
+    }
 
-  const novoProduto = produtoModelo.criarProduto(nome.trim());
-  res.status(201).json(novoProduto);
+    const novoProduto = await produtoModelo.criarProduto(nome.trim());
+    res.status(201).json(novoProduto);
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao criar produto.' });
+  }
 };
 
-exports.atualizarProduto = (req, res) => {
-  const id = Number(req.params.id);
-  const { nome } = req.body;
+exports.atualizarProduto = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { nome } = req.body;
 
-  if (!nome || !nome.trim()) {
-    return res.status(400).json({ erro: 'O nome do produto é obrigatório.' });
+    if (!nome || !nome.trim()) {
+      return res.status(400).json({ erro: 'O nome do produto é obrigatório.' });
+    }
+
+    const produto = await produtoModelo.atualizarProduto(id, nome.trim());
+    if (!produto) {
+      return res.status(404).json({ erro: 'Produto não encontrado.' });
+    }
+
+    res.json(produto);
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao atualizar produto.' });
   }
-
-  const produto = produtoModelo.atualizarProduto(id, nome.trim());
-  if (!produto) {
-    return res.status(404).json({ erro: 'Produto não encontrado.' });
-  }
-
-  res.json(produto);
 };
 
-exports.removerProduto = (req, res) => {
-  const id = Number(req.params.id);
-  const sucesso = produtoModelo.removerProduto(id);
+exports.removerProduto = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const sucesso = await produtoModelo.removerProduto(id);
 
-  if (!sucesso) {
-    return res.status(404).json({ erro: 'Produto não encontrado.' });
+    if (!sucesso) {
+      return res.status(404).json({ erro: 'Produto não encontrado.' });
+    }
+
+    res.json({ mensagem: 'Produto removido com sucesso.' });
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao remover produto.' });
   }
-
-  res.json({ mensagem: 'Produto removido com sucesso.' });
 };

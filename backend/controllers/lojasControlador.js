@@ -1,48 +1,64 @@
 const lojaModelo = require('../modelos/lojaModelo');
 
-exports.listarLojas = (req, res) => {
-  const lojas = lojaModelo.listarLojas();
-  res.json(lojas);
+exports.listarLojas = async (req, res) => {
+  try {
+    const lojas = await lojaModelo.listarLojas();
+    res.json(lojas);
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao listar lojas.' });
+  }
 };
 
-exports.criarLoja = (req, res) => {
-  const { nome } = req.body;
-  if (!nome || !nome.trim()) {
-    return res.status(400).json({ erro: 'O nome da loja é obrigatório.' });
-  }
+exports.criarLoja = async (req, res) => {
+  try {
+    const { nome } = req.body;
+    if (!nome || !nome.trim()) {
+      return res.status(400).json({ erro: 'O nome da loja é obrigatório.' });
+    }
 
-  const loja = lojaModelo.buscarPorNome(nome.trim());
-  if (loja) {
-    return res.status(409).json({ erro: 'Já existe uma loja com esse nome.' });
-  }
+    const loja = await lojaModelo.buscarPorNome(nome.trim());
+    if (loja) {
+      return res.status(409).json({ erro: 'Já existe uma loja com esse nome.' });
+    }
 
-  const novaLoja = lojaModelo.criarLoja(nome.trim());
-  res.status(201).json(novaLoja);
+    const novaLoja = await lojaModelo.criarLoja(nome.trim());
+    res.status(201).json(novaLoja);
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao criar loja.' });
+  }
 };
 
-exports.atualizarLoja = (req, res) => {
-  const id = Number(req.params.id);
-  const { nome } = req.body;
+exports.atualizarLoja = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { nome } = req.body;
 
-  if (!nome || !nome.trim()) {
-    return res.status(400).json({ erro: 'O nome da loja é obrigatório.' });
+    if (!nome || !nome.trim()) {
+      return res.status(400).json({ erro: 'O nome da loja é obrigatório.' });
+    }
+
+    const loja = await lojaModelo.atualizarLoja(id, nome.trim());
+    if (!loja) {
+      return res.status(404).json({ erro: 'Loja não encontrada.' });
+    }
+
+    res.json(loja);
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao atualizar loja.' });
   }
-
-  const loja = lojaModelo.atualizarLoja(id, nome.trim());
-  if (!loja) {
-    return res.status(404).json({ erro: 'Loja não encontrada.' });
-  }
-
-  res.json(loja);
 };
 
-exports.removerLoja = (req, res) => {
-  const id = Number(req.params.id);
-  const sucesso = lojaModelo.removerLoja(id);
+exports.removerLoja = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const sucesso = await lojaModelo.removerLoja(id);
 
-  if (!sucesso) {
-    return res.status(404).json({ erro: 'Loja não encontrada.' });
+    if (!sucesso) {
+      return res.status(404).json({ erro: 'Loja não encontrada.' });
+    }
+
+    res.json({ mensagem: 'Loja removida com sucesso.' });
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao remover loja.' });
   }
-
-  res.json({ mensagem: 'Loja removida com sucesso.' });
 };

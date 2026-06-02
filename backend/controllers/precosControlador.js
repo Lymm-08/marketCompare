@@ -18,80 +18,100 @@ function validarEntrada(req, res) {
   return true;
 }
 
-exports.listarPrecos = (req, res) => {
-  const precos = precoModelo.listarPrecos();
-  res.json(precos);
+exports.listarPrecos = async (req, res) => {
+  try {
+    const precos = await precoModelo.listarPrecos();
+    res.json(precos);
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao listar preços.' });
+  }
 };
 
-exports.compararPrecos = (req, res) => {
-  const nomeProduto = (req.query.nome || '').trim();
-  if (!nomeProduto) {
-    return res.status(400).json({ erro: 'Informe o nome do produto para comparar.' });
-  }
+exports.compararPrecos = async (req, res) => {
+  try {
+    const nomeProduto = (req.query.nome || '').trim();
+    if (!nomeProduto) {
+      return res.status(400).json({ erro: 'Informe o nome do produto para comparar.' });
+    }
 
-  const melhores = precoModelo.compararPorProduto(nomeProduto);
-  if (!melhores || melhores.length === 0) {
-    return res.status(404).json({ erro: 'Nenhum preço encontrado para este produto.' });
-  }
+    const melhores = await precoModelo.compararPorProduto(nomeProduto);
+    if (!melhores || melhores.length === 0) {
+      return res.status(404).json({ erro: 'Nenhum preço encontrado para este produto.' });
+    }
 
-  res.json(melhores);
+    res.json(melhores);
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao comparar preços.' });
+  }
 };
 
-exports.criarPreco = (req, res) => {
-  if (!validarEntrada(req, res)) return;
+exports.criarPreco = async (req, res) => {
+  try {
+    if (!validarEntrada(req, res)) return;
 
-  const produtoNome = req.body.produto.trim();
-  const lojaNome = req.body.loja.trim();
-  const valor = Number(req.body.valor);
+    const produtoNome = req.body.produto.trim();
+    const lojaNome = req.body.loja.trim();
+    const valor = Number(req.body.valor);
 
-  let produto = produtoModelo.buscarPorNome(produtoNome);
-  if (!produto) {
-    produto = produtoModelo.criarProduto(produtoNome);
+    let produto = await produtoModelo.buscarPorNome(produtoNome);
+    if (!produto) {
+      produto = await produtoModelo.criarProduto(produtoNome);
+    }
+
+    let loja = await lojaModelo.buscarPorNome(lojaNome);
+    if (!loja) {
+      loja = await lojaModelo.criarLoja(lojaNome);
+    }
+
+    const novoPreco = await precoModelo.criarPreco(produto.id, loja.id, valor);
+    res.status(201).json(novoPreco);
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao criar preço.' });
   }
-
-  let loja = lojaModelo.buscarPorNome(lojaNome);
-  if (!loja) {
-    loja = lojaModelo.criarLoja(lojaNome);
-  }
-
-  const novoPreco = precoModelo.criarPreco(produto.id, loja.id, valor);
-  res.status(201).json(novoPreco);
 };
 
-exports.atualizarPreco = (req, res) => {
-  if (!validarEntrada(req, res)) return;
+exports.atualizarPreco = async (req, res) => {
+  try {
+    if (!validarEntrada(req, res)) return;
 
-  const id = Number(req.params.id);
-  const produtoNome = req.body.produto.trim();
-  const lojaNome = req.body.loja.trim();
-  const valor = Number(req.body.valor);
+    const id = Number(req.params.id);
+    const produtoNome = req.body.produto.trim();
+    const lojaNome = req.body.loja.trim();
+    const valor = Number(req.body.valor);
 
-  const precoExistente = precoModelo.buscarPorId(id);
-  if (!precoExistente) {
-    return res.status(404).json({ erro: 'Preço não encontrado.' });
+    const precoExistente = await precoModelo.buscarPorId(id);
+    if (!precoExistente) {
+      return res.status(404).json({ erro: 'Preço não encontrado.' });
+    }
+
+    let produto = await produtoModelo.buscarPorNome(produtoNome);
+    if (!produto) {
+      produto = await produtoModelo.criarProduto(produtoNome);
+    }
+
+    let loja = await lojaModelo.buscarPorNome(lojaNome);
+    if (!loja) {
+      loja = await lojaModelo.criarLoja(lojaNome);
+    }
+
+    const precoAtualizado = await precoModelo.atualizarPreco(id, produto.id, loja.id, valor);
+    res.json(precoAtualizado);
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao atualizar preço.' });
   }
-
-  let produto = produtoModelo.buscarPorNome(produtoNome);
-  if (!produto) {
-    produto = produtoModelo.criarProduto(produtoNome);
-  }
-
-  let loja = lojaModelo.buscarPorNome(lojaNome);
-  if (!loja) {
-    loja = lojaModelo.criarLoja(lojaNome);
-  }
-
-  const precoAtualizado = precoModelo.atualizarPreco(id, produto.id, loja.id, valor);
-  res.json(precoAtualizado);
 };
 
-exports.removerPreco = (req, res) => {
-  const id = Number(req.params.id);
-  const sucesso = precoModelo.removerPreco(id);
+exports.removerPreco = async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const sucesso = await precoModelo.removerPreco(id);
 
-  if (!sucesso) {
-    return res.status(404).json({ erro: 'Preço não encontrado.' });
+    if (!sucesso) {
+      return res.status(404).json({ erro: 'Preço não encontrado.' });
+    }
+
+    res.json({ mensagem: 'Preço removido com sucesso.' });
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao remover preço.' });
   }
-
-  res.json({ mensagem: 'Preço removido com sucesso.' });
 };
