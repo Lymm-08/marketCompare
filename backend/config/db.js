@@ -1,44 +1,23 @@
-﻿// ========================================
-// CONFIGURAÇÃO DA CONEXÃO COM O BANCO
-// ========================================
+// Esta configuração é um placeholder para quando o MySQL for integrado.
+// Depois de criar o banco de dados, defina as variáveis de ambiente:
+// DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT.
+// Em seguida, substitua as funções de modelo pelo uso de pool.query.
 
-// Importa a biblioteca mysql2 utilizando Promises
-const mysql = require("mysql2/promise");
+const mysql = require('mysql2/promise');
 
+let pool = null;
 
-// ========================================
-// CRIAÇÃO DO POOL DE CONEXÕES
-// ========================================
+if (process.env.DB_HOST) {
+  pool = mysql.createPool({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT || 3306,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+  });
+}
 
-// Configura a conexão com o banco de dados MySQL
-const pool = mysql.createPool({
-
-  // Endereço do servidor MySQL
-  host: process.env.DB_HOST || "localhost",
-
-  // Usuário do banco de dados
-  user: process.env.DB_USER || "root",
-
-  // Senha do banco de dados
-  password: process.env.DB_PASSWORD || "",
-
-  // Nome do banco de dados
-  database: process.env.DB_NAME || "preco_justo",
-
-  // Mantém conexões disponíveis para reutilização
-  waitForConnections: true,
-
-  // Quantidade máxima de conexões simultâneas
-  connectionLimit: 10,
-
-  // Limite da fila de espera (0 = ilimitado)
-  queueLimit: 0
-});
-
-
-// ========================================
-// EXPORTAÇÃO DA CONEXÃO
-// ========================================
-
-// Disponibiliza o pool para ser utilizado em outros arquivos
-module.exports = pool;
+module.exports = { pool };

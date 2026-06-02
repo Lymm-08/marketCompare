@@ -1,108 +1,34 @@
-﻿// ========================================
-// IMPORTAÇÃO DE CONFIGURAÇÕES E BIBLIOTECAS
-// ========================================
+const path = require('path');
+const express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
 
-// Carrega as variáveis do arquivo .env
-require("dotenv").config();
-
-// Framework principal da aplicação
-const express = require("express");
-
-// Utilitário para manipulação de caminhos de arquivos
-const path = require("path");
-
-// Permite requisições entre diferentes origens (frontend ↔ backend)
-const cors = require("cors");
-
-
-// ========================================
-// IMPORTAÇÃO DAS ROTAS
-// ========================================
-
-const produtosRotas = require("./rotas/produtosRotas");
-const mercadosRotas = require("./rotas/mercadosRotas");
-const precosRotas = require("./rotas/precosRotas");
-const pesquisaRotas = require("./rotas/pesquisaRotas");
-
-
-// ========================================
-// CONFIGURAÇÃO INICIAL DO SERVIDOR
-// ========================================
+const lojasRotas = require('./rotas/lojasRotas');
+const produtoRotas = require('./rotas/produtoRotas');
+const precosRotas = require('./rotas/precosRotas');
 
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-// Define a porta do servidor
-const port = process.env.PORT || 3000;
-
-
-// ========================================
-// MIDDLEWARES
-// ========================================
-
-// Permite comunicação entre frontend e backend
 app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-// Permite receber JSON nas requisições
-app.use(express.json());
+app.use('/api/lojas', lojasRotas);
+app.use('/api/produtos', produtoRotas);
+app.use('/api/precos', precosRotas);
 
-// Permite receber dados de formulários
-app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, '../frontend')));
 
-
-// ========================================
-// ROTAS DA API
-// ========================================
-
-// Rotas relacionadas aos produtos
-app.use("/api/produtos", produtosRotas);
-
-// Rotas relacionadas aos supermercados
-app.use("/api/mercados", mercadosRotas);
-
-// Rotas relacionadas aos preços
-app.use("/api/precos", precosRotas);
-
-// Rotas relacionadas à pesquisa e comparação
-app.use("/api/pesquisa", pesquisaRotas);
-
-
-// ========================================
-// FRONTEND ESTÁTICO
-// ========================================
-
-// Caminho da pasta frontend
-const publicPath = path.join(__dirname, "../frontend");
-
-// Permite servir arquivos estáticos (HTML, CSS e JS)
-app.use(express.static(publicPath));
-
-// Define a página inicial
-app.get("/", (req, res) =>
-  res.sendFile(path.join(publicPath, "index.html"))
-);
-
-
-// ========================================
-// TRATAMENTO GLOBAL DE ERROS
-// ========================================
-
-app.use((err, req, res, next) => {
-
-  // Exibe o erro no terminal
-  console.error("Erro interno:", err);
-
-  // Retorna mensagem amigável ao usuário
-  res.status(500).json({
-    error: "Erro interno do servidor."
-  });
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Erro interno do servidor.' });
+});
 
-// ========================================
-// INICIALIZAÇÃO DO SERVIDOR
-// ========================================
-
-// Inicia o servidor na porta configurada
-app.listen(port, () =>
-  console.log(`Servidor rodando em http://localhost:${port}`)
-);
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
+});

@@ -1,95 +1,30 @@
-﻿// ========================================
-// IMPORTAÇÃO DA CONEXÃO COM O BANCO
-// ========================================
+let produtos = [];
+let proximoId = 1;
 
-// Importa a conexão com o banco de dados
-const db = require("../config/db");
+exports.listarProdutos = () => produtos;
 
+exports.buscarPorId = (id) => produtos.find((item) => item.id === id) || null;
 
-// ========================================
-// MODELO PRODUTO
-// ========================================
+exports.buscarPorNome = (nome) => produtos.find((item) => item.nome.toLowerCase() === nome.toLowerCase()) || null;
 
-// Responsável pelas operações da tabela produtos
-const Produto = {
-
-  // ========================================
-  // LISTAR TODOS OS PRODUTOS
-  // ========================================
-
-  async listarTodos() {
-
-    // Busca todos os produtos cadastrados
-    // ordenados alfabeticamente pelo nome
-    const [rows] = await db.query(
-      "SELECT id, nome, categoria FROM produtos ORDER BY nome"
-    );
-
-    return rows;
-  },
-
-
-  // ========================================
-  // BUSCAR PRODUTO POR ID
-  // ========================================
-
-  async obterPorId(id) {
-
-    // Busca um produto específico pelo ID
-    const [rows] = await db.query(
-      "SELECT id, nome, categoria FROM produtos WHERE id = ?",
-      [id]
-    );
-
-    // Retorna o primeiro resultado encontrado
-    return rows[0];
-  },
-
-
-  // ========================================
-  // BUSCAR PRODUTO POR NOME
-  // ========================================
-
-  async buscarPorNome(nome) {
-
-    // Adiciona curingas (%) para permitir busca parcial
-    const termo = `%${nome}%`;
-
-    // Busca produtos cujo nome contenha o texto informado
-    const [rows] = await db.query(
-      "SELECT id, nome, categoria FROM produtos WHERE nome LIKE ? ORDER BY nome",
-      [termo]
-    );
-
-    return rows;
-  },
-
-
-  // ========================================
-  // CADASTRAR PRODUTO
-  // ========================================
-
-  async criar({ nome, categoria }) {
-
-    // Insere um novo produto na tabela
-    const [result] = await db.query(
-      "INSERT INTO produtos (nome, categoria) VALUES (?, ?)",
-      [nome, categoria]
-    );
-
-    // Retorna os dados cadastrados
-    return {
-      id: result.insertId,
-      nome,
-      categoria
-    };
-  }
+exports.criarProduto = (nome) => {
+  const novoProduto = { id: proximoId++, nome };
+  produtos.push(novoProduto);
+  return novoProduto;
 };
 
+exports.atualizarProduto = (id, nome) => {
+  const produto = exports.buscarPorId(id);
+  if (!produto) return null;
+  produto.nome = nome;
+  return produto;
+};
 
-// ========================================
-// EXPORTAÇÃO DO MODELO
-// ========================================
+exports.removerProduto = (id) => {
+  const indice = produtos.findIndex((item) => item.id === id);
+  if (indice === -1) return false;
+  produtos.splice(indice, 1);
+  return true;
+};
 
-// Disponibiliza o modelo para outros arquivos
-module.exports = Produto;
+// TODO: Substituir por queries MySQL usando backend/config/db.js quando for integrar o banco.

@@ -1,6 +1,11 @@
-﻿const express = require("express");
-const { listar, criar } = require("../controladores/precosControlador");
+const express = require('express');
 const router = express.Router();
-router.get("/", listar);
-router.post("/", criar);
+const precosControlador = require('../controllers/precosControlador');
+
+router.get('/', precosControlador.listarPrecos);
+router.get('/comparar', precosControlador.compararPrecos);
+router.post('/', precosControlador.criarPreco);
+router.put('/:id', precosControlador.atualizarPreco);
+router.delete('/:id', precosControlador.removerPreco);
+
 module.exports = router;
