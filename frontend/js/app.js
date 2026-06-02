@@ -115,6 +115,7 @@ async function comparar() {
       return;
     }
 
+    // lista de ofertas
     const lista = document.createElement('ul');
     dados.forEach((item) => {
       const itemLi = document.createElement('li');
@@ -122,14 +123,28 @@ async function comparar() {
       lista.appendChild(itemLi);
     });
 
-    resultadoComparacao.innerHTML = '';
+    // melhor preço (primeiro da lista ordenada asc)
     const melhor = dados[0];
+
+    // calcular economia: diferença entre maior e menor encontrado
+    const valores = dados.map((d) => Number(d.valor));
+    const maior = Math.max(...valores);
+    const menor = Math.min(...valores);
+    const economia = (maior - menor).toFixed(2);
+
+    resultadoComparacao.innerHTML = '';
     resultadoComparacao.appendChild(lista);
+
     const destaque = document.createElement('div');
-    destaque.className = 'mensagem ativo';
-    destaque.style.background = 'rgba(46, 204, 113, 0.12)';
-    destaque.textContent = `Melhor preço: ${melhor.loja} - R$ ${Number(melhor.valor).toFixed(2)}`;
+    destaque.className = 'melhor-preco-box';
+    destaque.innerHTML = `<strong>Melhor Preço: ${melhor.loja} - R$ ${Number(melhor.valor).toFixed(2)}</strong>`;
     resultadoComparacao.appendChild(destaque);
+
+    const economiaBox = document.createElement('div');
+    economiaBox.className = 'economia-box';
+    economiaBox.innerHTML = `Você economiza R$ ${economia} comprando na ${melhor.loja}!`;
+    resultadoComparacao.appendChild(economiaBox);
+
     showView('results');
   } catch (erro) {
     resultadoComparacao.innerHTML = '<p>Não foi possível buscar os preços. Tente novamente.</p>';
