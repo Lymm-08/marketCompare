@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev-backend": "SET PORT=3001 && npm run dev --prefix backend",
-    "serve-frontend": "npx http-server frontend -p 5501"
-    "start-all": "npm run dev --prefix backend",
+    "serve-frontend": "npx http-server frontend -p 5501",
+    "start-all": "npm run dev --prefix backend"
   },
   "devDependencies": {
     "concurrently": "^8.2.0",
