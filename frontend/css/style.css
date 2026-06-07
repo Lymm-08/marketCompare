@@ -76,4 +76,18 @@ body{font-family:'Poppins',system-ui,Segoe UI,Roboto,Arial; background:var(--bg)
   .cart{display:none}
 }
 
+/* Mobile improvements: better spacing, touch targets, and scaled logo */
+@media (max-width:600px){
+  .hero-logo{font-size:36px}
+  .hero{padding:18px}
+  .main-hero{padding:28px 12px 60px}
+  .search-row{flex-direction:column;align-items:stretch;gap:10px}
+  .search-input{padding:14px 12px;border-radius:10px;font-size:16px}
+  .search-btn{width:100%;padding:14px 16px}
+  .header-inner{padding:8px 12px;flex-wrap:wrap;justify-content:space-between}
+  .brand{gap:8px}
+  .btn{padding:10px 12px}
+  .hero-sub{font-size:14px}
+}
+
 /* cleaned invalid rule above */
