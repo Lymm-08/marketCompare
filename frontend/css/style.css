@@ -38,9 +38,9 @@ body{font-family:'Poppins',system-ui,Segoe UI,Roboto,Arial; background:var(--bg)
 .hero-sub{color:var(--muted);margin-top:14px}
 
 /* Inline logo shown next to search input */
-.inline-logo{display:flex;align-items:center;gap:6px;font-size:40px;font-weight:700;margin-right:6px}
-.inline-logo .blue{color:var(--blue)}
-.inline-logo .green{color:var(--green)}
+.hero-logo{display:flex;align-items:center;gap:6px;font-size:48px;font-weight:700;justify-content:center;margin-bottom:12px}
+.hero-logo .blue{color:var(--blue)}
+.hero-logo .green{color:var(--green)}
 
 /* CARDS */
 .cards{display:grid;grid-template-columns:repeat(1,1fr);gap:14px;margin-top:18px}
@@ -66,7 +66,7 @@ body{font-family:'Poppins',system-ui,Segoe UI,Roboto,Arial; background:var(--bg)
 .btn-delete{background:#e53e3e;color:#fff}
 
 /* Responsive */
-@media (min-width:700px){.cards{grid-template-columns:repeat(1,1fr)}.hero-title{font-size:48px}.inline-logo{font-size:48px}}
+@media (min-width:700px){.cards{grid-template-columns:repeat(1,1fr)}.hero-title{font-size:48px}.inline-logo{font-size:48px}.hero-logo{font-size:56px}}
 @media (min-width:992px){.cards{grid-template-columns:repeat(1,1fr)}}
 @media (max-width:600px){
   .search-row{flex-direction:column}
