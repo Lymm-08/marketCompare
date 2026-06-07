@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start-all": "concurrently \"npm:dev-backend\" \"npm:serve-frontend\"",
-    "dev-backend": "npm run dev --prefix backend",
+    "dev-backend": "SET PORT=3001 && npm run dev --prefix backend",
     "serve-frontend": "npx http-server frontend -p 5500"
   },
   "devDependencies": {
