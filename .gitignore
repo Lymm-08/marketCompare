@@ -1,29 +1,11 @@
-# Node dependencies
-/node_modules/
-
-# Environment files
+node_modules/
 .env
-backend/.env
-
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# OS files
+npm-debug.log
 .DS_Store
-Thumbs.db
-
-# IDE files
 .vscode/
-
-# Build output
-dist/
-build/
-
-# MySQL local credential files
-**/database/*.env
-
-# Temporary files
-*.tmp
+logs/
 *.log
+frontend/dist/
+frontend/.cache/
+backend/node_modules/
+database/*.sql

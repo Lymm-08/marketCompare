@@ -1,21 +1,12 @@
--- Estrutura de banco de dados para o Comparador de Preços
--- Crie este schema no MySQL e depois configure as credenciais em backend/config/db.js.
-
-CREATE TABLE IF NOT EXISTS lojas (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  nome VARCHAR(255) NOT NULL UNIQUE
-);
+-- Schema for ContaCerta
+CREATE DATABASE IF NOT EXISTS contacerta_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE contacerta_db;
 
 CREATE TABLE IF NOT EXISTS produtos (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  nome VARCHAR(255) NOT NULL UNIQUE
-);
-
-CREATE TABLE IF NOT EXISTS precos (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  produto_id INT NOT NULL,
-  loja_id INT NOT NULL,
-  valor DECIMAL(10,2) NOT NULL,
-  FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE,
-  FOREIGN KEY (loja_id) REFERENCES lojas(id) ON DELETE CASCADE
+  nome_produto VARCHAR(255) NOT NULL,
+  nome_mercado VARCHAR(255) NOT NULL,
+  endereco VARCHAR(255) NOT NULL,
+  preco DECIMAL(10,2) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
