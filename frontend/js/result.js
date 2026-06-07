@@ -27,6 +27,9 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     cardsEl.appendChild(div);
   });
 
+  // ensure add-product buttons work on this page
+  document.querySelectorAll('.add-product').forEach(b=>b.addEventListener('click', ()=>location.href='add.html'));
+
   if(results.length>0){
     banner.hidden = false;
     banner.textContent = data.message || '';

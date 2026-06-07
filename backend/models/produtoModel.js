@@ -1,10 +1,24 @@
 const db = require('../config/database');
+const fs = require('fs');
+const path = require('path');
+const jsonFile = path.join(__dirname,'..','data','products.json');
+
+function writeJson(data){
+  try{ fs.writeFileSync(jsonFile, JSON.stringify(data, null, 2), 'utf8'); }catch(e){console.error('Erro ao escrever JSON:', e.message)}
+}
 
 const Produto = {
   async create(data){
     const sql = `INSERT INTO produtos (nome_produto,nome_mercado,endereco,preco) VALUES (?,?,?,?)`;
     const [res] = await db.execute(sql,[data.nome_produto,data.nome_mercado,data.endereco,data.preco]);
-    return {id: res.insertId, ...data};
+    const created = {id: res.insertId, ...data};
+    // append to JSON file
+    try{
+      const curr = JSON.parse(fs.readFileSync(jsonFile,'utf8') || '[]');
+      curr.push(created);
+      writeJson(curr);
+    }catch(e){console.error('Erro atualizando JSON:', e.message)}
+    return created;
   },
   async findAll(){
     const [rows] = await db.execute(`SELECT * FROM produtos ORDER BY id DESC`);
@@ -33,7 +47,7 @@ const Produto = {
   async searchByName(nome){
     // Search by nome_produto (case-insensitive) and return 3 lowest prices
     const like = `%${nome}%`;
-    const [rows] = await db.execute(`SELECT nome_mercado, endereco, preco, nome_produto FROM produtos WHERE nome_produto LIKE ? ORDER BY preco ASC LIMIT 3`,[like]);
+    const [rows] = await db.execute(`SELECT nome_mercado, endereco, preco, nome_produto FROM produtos WHERE LOWER(nome_produto) LIKE LOWER(?) ORDER BY preco ASC LIMIT 3`,[like]);
     return rows;
   }
 }

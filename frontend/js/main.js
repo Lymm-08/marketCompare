@@ -1,12 +1,10 @@
 // Main script for index page: handle navigation and search
 document.addEventListener('DOMContentLoaded', ()=>{
-  const addBtn = document.getElementById('addBtn');
   const searchBtn = document.getElementById('searchBtn');
   const q = document.getElementById('q');
 
-  addBtn?.addEventListener('click', ()=>{
-    location.href = 'add.html';
-  });
+  // any button with class add-product navigates to add page
+  document.querySelectorAll('.add-product').forEach(b=>b.addEventListener('click', ()=>location.href='add.html'));
 
   searchBtn?.addEventListener('click', ()=>{
     const val = q.value.trim();

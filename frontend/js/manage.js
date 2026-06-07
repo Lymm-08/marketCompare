@@ -18,6 +18,8 @@ function createTable(products){
 document.addEventListener('DOMContentLoaded', async ()=>{
   const data = await fetchAll();
   createTable(data || []);
+  // bind add-product on manage page
+  document.querySelectorAll('.add-product').forEach(b=>b.addEventListener('click', ()=>location.href='add.html'));
 });
 
 function edit(id){

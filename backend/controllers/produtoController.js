@@ -6,7 +6,9 @@ const ProdutoController = {
   },
   async create(req,res){
     try{const body = req.body; if(!body.nome_produto) return res.status(400).json({error:'nome_produto obrigatório'});
-      const novo = await Produto.create(body);res.status(201).json(novo);
+      const novo = await Produto.create(body);
+      // also ensure JSON file updated is returned
+      res.status(201).json(novo);
     }catch(err){console.error(err);res.status(500).json({error:'Erro ao criar produto'})}
   },
   async update(req,res){

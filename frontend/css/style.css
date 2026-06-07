@@ -54,5 +54,6 @@ body{font-family:'Poppins',system-ui,Segoe UI,Roboto,Arial; background:var(--bg)
   .search-row{flex-direction:column}
   .search-input{width:100%}
   .header-inner{padding:10px}
+  .cart-emoji{font-size:26px}
   .cart{display:none}
 }
