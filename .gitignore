@@ -9,3 +9,4 @@ frontend/dist/
 frontend/.cache/
 backend/node_modules/
 database/*.sql
+RUN_LOCALLY.md
