@@ -12,6 +12,7 @@ const ctrl = require('../controllers/produtoController');
 
 // 2) Routes
 router.get('/', ctrl.list);
+router.get('/:id', ctrl.getById);
 router.get('/busca/:nome', ctrl.search);
 router.post('/', ctrl.create);
 router.put('/:id', ctrl.update);

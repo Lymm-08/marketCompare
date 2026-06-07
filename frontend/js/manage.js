@@ -23,13 +23,8 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 });
 
 function edit(id){
-  const nome = prompt('Novo preço (apenas para demonstração). Deixe em branco para abrir edição completa.');
-  if(nome){
-    // Simple edit demo: only price
-    fetch(`http://localhost:3000/produtos/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({preco:Number(nome)})}).then(()=>location.reload());
-  }else{
-    location.href = `add.html`;
-  }
+  // navigate to add page with id to perform full edit
+  location.href = `add.html?id=${id}`;
 }
 
 function remove(id){if(!confirm('Excluir este produto?')) return;fetch(`http://localhost:3000/produtos/${id}`,{method:'DELETE'}).then(()=>location.reload());}

@@ -58,12 +58,28 @@ const Produto = {
     values.push(id);
     const sql = `UPDATE produtos SET ${fields.join(', ')} WHERE id = ?`;
     await db.execute(sql, values);
-    return this.findById(id);
+    const updated = await this.findById(id);
+    // update JSON mirror
+    try{
+      const curr = JSON.parse(fs.readFileSync(jsonFile,'utf8') || '[]');
+      const idx = curr.findIndex(p=>String(p.id)===String(id));
+      if(idx>=0){
+        curr[idx] = {...curr[idx], ...updated};
+        writeJson(curr);
+      }
+    }catch(e){console.error('Erro atualizando JSON (update):', e.message)}
+    return updated;
   },
 
   // remove um produto
   async remove(id){
     await db.execute(`DELETE FROM produtos WHERE id = ?`,[id]);
+    // update JSON mirror
+    try{
+      const curr = JSON.parse(fs.readFileSync(jsonFile,'utf8') || '[]');
+      const filtered = curr.filter(p=>String(p.id)!==String(id));
+      writeJson(filtered);
+    }catch(e){console.error('Erro atualizando JSON (remove):', e.message)}
     return true;
   },
 

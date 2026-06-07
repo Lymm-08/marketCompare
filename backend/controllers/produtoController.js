@@ -60,6 +60,19 @@ const ProdutoController = {
     }
   },
 
+  // obter produto por id
+  async getById(req,res){
+    try{
+      const id = req.params.id;
+      const prod = await Produto.findById(id);
+      if(!prod) return res.status(404).json({error:'Produto não encontrado'});
+      res.json(prod);
+    }catch(err){
+      console.error(err);
+      res.status(500).json({error:'Erro ao buscar produto'});
+    }
+  },
+
   // buscar produto por nome (retorna até 3 menores preços e mensagem de economia)
   async search(req,res){
     try{
