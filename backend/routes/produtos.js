@@ -12,8 +12,9 @@ const ctrl = require('../controllers/produtoController');
 
 // 2) Routes
 router.get('/', ctrl.list);
-router.get('/:id', ctrl.getById);
+// colocar a rota de busca antes da rota por id para evitar conflito com ':id'
 router.get('/busca/:nome', ctrl.search);
+router.get('/:id', ctrl.getById);
 router.post('/', ctrl.create);
 router.put('/:id', ctrl.update);
 router.delete('/:id', ctrl.remove);
