@@ -83,7 +83,6 @@ If you want to use MySQL, edit the .env file and change the variable to somethin
 DATABASE_URL=mysql+pymysql://root:password@localhost:3306/marketcompare
 ```
 
-## How to create the database in MySQL
 
 1. Open MySQL Workbench, phpMyAdmin, or the MySQL terminal.
 2. Create the b
