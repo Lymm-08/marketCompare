@@ -129,13 +129,4 @@ Acesse:
 
 ```text
 http://localhost:5000
-```
-
-## Observações profissionais
-
-- O projeto já funciona com SQLite por padrão.
-- O suporte a MySQL está preparado e documentado.
-- O CSS foi separado em arquivos por responsabilidade: base, componentes e entrada principal.
-- Os dados iniciais estão isolados em [backend/app/seed_data.py](backend/app/seed_data.py).
-
 
