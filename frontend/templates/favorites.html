@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-12">
+    <h2 class="mb-4">Favoritos</h2>
+  </div>
+  {% for favorite in favorites %}
+  <div class="col-md-6 col-xl-4">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">{{ favorite.product.name }} - {{ favorite.product.brand }}</h5>
+        <p class="text-muted">{{ favorite.product.category }}</p>
+        <a href="{{ url_for('main.compare', product_id=favorite.product.id) }}" class="btn btn-primary">Abrir comparação</a>
+        <form method="post" action="{{ url_for('main.remover_favorito', product_id=favorite.product.id) }}" class="mt-2">
+          <button class="btn btn-outline-danger" type="submit">Remover</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="col-12">
+    <div class="alert alert-info">Você ainda não possui favoritos.</div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

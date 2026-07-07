@@ -8,5 +8,14 @@ logs/
 frontend/dist/
 frontend/.cache/
 backend/node_modules/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+instance/
+marketcompare.db
+*.sqlite3
+*.db
 database/*.sql
 RUN_LOCALLY.md

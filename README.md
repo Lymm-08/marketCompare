@@ -1,45 +1,138 @@
-# ContaCerta
+# MarketCompare
 
-Projeto completo (frontend estático + backend Node/Express + MySQL) para comparação de preços.
+Este projeto utiliza uma base de dados manual para demonstração do funcionamento do sistema. Em uma versão futura, os preços poderão ser atualizados automaticamente por meio de integrações com supermercados.
 
-Instalação e execução (passos recomendados):
+## Stack
 
-1. Instalar dependências na raiz (instala ferramentas de desenvolvimento):
+- Python 3.10+
+- Flask
+- Flask-SQLAlchemy
+- Flask-Login
+- MySQL opcional (SQLite por padrão)
+- Bootstrap
 
-```powershell
-cd c:\Users\emily\Documents\TCC-comparador-de-precos
-npm install
+## Estrutura do projeto
+
+```text
+app.py
+backend/
+  app/
+    __init__.py
+    config.py
+    models.py
+    routes.py
+    seed_data.py
+frontend/
+  static/
+    css/
+      base.css
+      components.css
+      main.css
+      style.css
+    js/
+      app.js
+  templates/
+    auth/
+    base.html
+    index.html
+    compare.html
+    favorites.html
+    add_product.html
+    cadastros.html
+    edit_cadastro.html
+    etc.
+database/
+  marketcompare_mysql.sql
+  mysql_setup.py
+  schema.sql
+  seed.sql
+requirements.txt
+.env.example
 ```
 
-2. Instalar dependências do backend (opcional se já instalou):
+## Como rodar localmente
 
-```powershell
-cd backend
-npm install
+### 1) Criar ambiente virtual
+
+```bash
+python -m venv .venv
+.venv\Scripts\activate
 ```
 
-3. Inicializar banco (opção rápida via Node script):
+### 2) Instalar dependências
 
-```powershell
-cd backend
-REM copie .env.example para .env e preencha as credenciais
-npm run init-db
+```bash
+pip install -r requirements.txt
 ```
 
-4. Iniciar backend + frontend juntos (a partir da raiz):
+### 3) Criar o arquivo .env
 
-```powershell
-cd c:\Users\emily\Documents\TCC-comparador-de-precos
-npm run start-all
+Copie o exemplo:
+
+```bash
+copy .env.example .env
 ```
 
-Isso inicia o backend (nodemon) e um servidor estático para `frontend` em `http://localhost:5500`.
+Se quiser usar SQLite, não precisa alterar nada.
 
-Endpoints principais (backend):
+Se quiser usar MySQL, edite o arquivo .env e troque a variável para algo como:
 
-- `GET /produtos`
-- `GET /produtos/busca/:nome`
-- `GET /produtos/:id`
-- `POST /produtos`
-- `PUT /produtos/:id`
-- `DELETE /produtos/:id`
+```env
+DATABASE_URL=mysql+pymysql://root:senha@localhost:3306/marketcompare
+```
+
+## Como criar o banco no MySQL
+
+1. Abra o MySQL Workbench, phpMyAdmin ou o terminal do MySQL.
+2. Crie o banco:
+
+```sql
+CREATE DATABASE marketcompare CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+3. Execute o script SQL do projeto:
+
+```bash
+mysql -u root -p < database/marketcompare_mysql.sql
+```
+
+Ou abra o arquivo [database/marketcompare_mysql.sql](database/marketcompare_mysql.sql) no seu cliente MySQL e execute todo o conteúdo.
+
+## Onde editar para conectar ao banco
+
+- Arquivo principal de configuração: [backend/app/config.py](backend/app/config.py)
+- Arquivo de ambiente: [.env.example](.env.example)
+- Arquivo real do ambiente: [.env](.env) (crie este arquivo a partir do exemplo)
+
+A aplicação lê a URL de conexão a partir da variável DATABASE_URL.
+
+### Exemplo de configuração MySQL
+
+```env
+DATABASE_URL=mysql+pymysql://usuario:senha@localhost:3306/marketcompare
+```
+
+Substitua:
+- usuario pelo seu usuário do MySQL
+- senha pela sua senha
+- localhost pelo host do seu servidor MySQL, se necessário
+- marketcompare pelo nome do seu banco
+
+## Executar a aplicação
+
+```bash
+python app.py
+```
+
+Acesse:
+
+```text
+http://localhost:5000
+```
+
+## Observações profissionais
+
+- O projeto já funciona com SQLite por padrão.
+- O suporte a MySQL está preparado e documentado.
+- O CSS foi separado em arquivos por responsabilidade: base, componentes e entrada principal.
+- Os dados iniciais estão isolados em [backend/app/seed_data.py](backend/app/seed_data.py).

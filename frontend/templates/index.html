@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="text-center py-5">
+      <h1 class="display-5 fw-bold text-primary">Compare preços e economize</h1>
+      <p class="lead text-muted">Busque produtos e veja os melhores preços entre os principais supermercados.</p>
+      <form class="input-group input-group-lg shadow-sm mt-4" method="get" action="{{ url_for('main.index') }}">
+        <input type="text" class="form-control" name="q" placeholder="Pesquisar por produto, marca ou categoria" value="{{ query }}" />
+        <button class="btn btn-success" type="submit">Buscar</button>
+      </form>
+    </div>
+
+    <form method="get" class="row g-3 bg-white p-3 rounded shadow-sm mb-4">
+      <div class="col-md-4">
+        <label class="form-label">Categoria</label>
+        <select class="form-select" name="category">
+          <option value="">Todas</option>
+          {% for item in categories %}
+            <option value="{{ item }}" {% if item == category %}selected{% endif %}>{{ item }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Mercado</label>
+        <select class="form-select" name="market">
+          <option value="">Todos</option>
+          {% for item in markets %}
+            <option value="{{ item }}" {% if item == market %}selected{% endif %}>{{ item }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Ordenação</label>
+        <select class="form-select" name="sort">
+          <option value="menor-preco" {% if sort == 'menor-preco' %}selected{% endif %}>Menor preço</option>
+          <option value="nome" {% if sort == 'nome' %}selected{% endif %}>Nome</option>
+        </select>
+      </div>
+      <div class="col-12 text-end">
+        <button class="btn btn-outline-primary" type="submit">Aplicar filtros</button>
+      </div>
+    </form>
+
+    <div class="row g-4">
+      {% for item in products %}
+      <div class="col-md-6 col-xl-4">
+        <div class="card h-100 shadow-sm">
+          <img src="{{ item.product.image_url or 'https://via.placeholder.com/300x180' }}" class="card-img-top" alt="{{ item.product.name }}" />
+          <div class="card-body">
+            <span class="badge text-bg-light mb-2">{{ item.product.category }}</span>
+            <h5 class="card-title">{{ item.product.name }}</h5>
+            <p class="card-text text-muted">{{ item.product.brand }}</p>
+            <p class="fw-bold text-success">Menor preço: R$ {{ '%.2f'|format(item.cheapest_price or 0) }}</p>
+            <a href="{{ url_for('main.compare', product_id=item.product.id) }}" class="btn btn-primary">Comparar preços</a>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div class="col-12">
+        <div class="alert alert-info">Nenhum produto encontrado.</div>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% if pagination.pages > 1 %}
+    <nav class="mt-4">
+      <ul class="pagination justify-content-center">
+        {% for page_num in pagination.iter_pages() %}
+          {% if page_num %}
+            <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+              <a class="page-link" href="{{ url_for('main.index', q=query, category=category, market=market, sort=sort, page=page_num) }}">{{ page_num }}</a>
+            </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </nav>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

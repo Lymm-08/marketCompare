@@ -1,0 +1,20 @@
+.card {
+  border: none;
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+}
+
+.btn-success {
+  background-color: var(--success);
+  border-color: var(--success);
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+img.card-img-top {
+  height: 180px;
+  object-fit: cover;
+}
