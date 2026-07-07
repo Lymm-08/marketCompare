@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # MarketCompare
 
 Este projeto utiliza uma base de dados manual para demonstração do funcionamento do sistema. Em uma versão futura, os preços poderão ser atualizados automaticamente por meio de integrações com supermercados.
@@ -136,3 +137,5 @@ http://localhost:5000
 - O suporte a MySQL está preparado e documentado.
 - O CSS foi separado em arquivos por responsabilidade: base, componentes e entrada principal.
 - Os dados iniciais estão isolados em [backend/app/seed_data.py](backend/app/seed_data.py).
+
+
