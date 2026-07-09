@@ -1,21 +1,26 @@
 from decimal import Decimal
+from pathlib import Path
 
 from flask import (
     Blueprint,
+    abort,
     flash,
     jsonify,
     redirect,
     render_template,
     request,
+    send_from_directory,
     url_for,
 )
 from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy import or_
 
 from . import DB, login_manager
+from .config import STATIC_DIR
 from .models import Favorite, Market, Price, Product, User, UserCadastro
 
 main = Blueprint("main", __name__)
+IMAGE_DIR = STATIC_DIR / "js" / "image"
 
 
 def is_valid_email(email: str) -> bool:
@@ -33,12 +38,24 @@ def normalize_category(category: str) -> str:
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return DB.session.get(User, int(user_id))
 
 
 @main.context_processor
 def inject_user():
     return {"current_user": current_user}
+
+
+@main.route("/image/<path:filename>")
+def serve_local_image(filename):
+    safe_path = Path(filename)
+    if any(part in {"..", ""} for part in safe_path.parts):
+        abort(404)
+
+    image_path = IMAGE_DIR / safe_path
+    if image_path.exists() and image_path.is_file():
+        return send_from_directory(str(IMAGE_DIR), str(safe_path))
+    abort(404)
 
 
 @main.route("/")
@@ -53,26 +70,47 @@ def index():
     if query:
         like_query = f"%{query}%"
         products_query = products_query.filter(
-            or_(Product.name.ilike(like_query), Product.brand.ilike(like_query), Product.category.ilike(like_query))
+            or_(
+                Product.name.ilike(like_query),
+                Product.brand.ilike(like_query),
+                Product.category.ilike(like_query),
+            )
         )
     if category:
-        products_query = products_query.filter(Product.category.ilike(f"%{category}%"))
+        products_query = products_query.filter(
+            Product.category.ilike(f"%{category}%")
+        )
     if market:
-        products_query = products_query.join(Product.prices).join(Price.market).filter(Market.name.ilike(f"%{market}%")).distinct()
+        products_query = (
+            products_query.join(Product.prices)
+            .join(Price.market)
+            .filter(Market.name.ilike(f"%{market}%"))
+            .distinct()
+        )
 
     if sort == "menor-preco":
         products_query = products_query.order_by(Product.name.asc())
     else:
         products_query = products_query.order_by(Product.name.desc())
 
-    pagination = products_query.paginate(page=page, per_page=10, error_out=False)
+    pagination = products_query.paginate(
+        page=page,
+        per_page=10,
+        error_out=False,
+    )
     products = []
     for product in pagination.items:
         prices = [float(price.price) for price in product.prices]
         cheapest = min(prices) if prices else None
         products.append({"product": product, "cheapest_price": cheapest})
 
-    raw_categories = [item[0] for item in DB.session.query(Product.category).distinct().order_by(Product.category).all()]
+    raw_categories = [
+        item[0]
+        for item in DB.session.query(Product.category)
+        .distinct()
+        .order_by(Product.category)
+        .all()
+    ]
     categories = []
     seen_categories = set()
     for item in raw_categories:
@@ -80,7 +118,13 @@ def index():
         if normalized not in seen_categories:
             seen_categories.add(normalized)
             categories.append(normalized)
-    markets = [item[0] for item in DB.session.query(Market.name).distinct().order_by(Market.name).all()]
+    markets = [
+        item[0]
+        for item in DB.session.query(Market.name)
+        .distinct()
+        .order_by(Market.name)
+        .all()
+    ]
 
     return render_template(
         "index.html",
@@ -102,7 +146,11 @@ def api_produtos():
     if query:
         like_query = f"%{query}%"
         products_query = products_query.filter(
-            or_(Product.name.ilike(like_query), Product.brand.ilike(like_query), Product.category.ilike(like_query))
+            or_(
+                Product.name.ilike(like_query),
+                Product.brand.ilike(like_query),
+                Product.category.ilike(like_query),
+            )
         )
     products = products_query.limit(10).all()
     payload = []
@@ -138,16 +186,26 @@ def compare(product_id):
     cheapest = float(prices[0].price)
     expensive = float(prices[-1].price)
     savings = round(expensive - cheapest, 2)
-    return render_template("compare.html", product=product, prices=prices, savings=savings)
+    return render_template(
+        "compare.html",
+        product=product,
+        prices=prices,
+        savings=savings,
+    )
 
 
 @main.route("/favoritar/<int:product_id>", methods=["POST"])
 @login_required
 def favoritar(product_id):
     product = Product.query.get_or_404(product_id)
-    favorite = Favorite.query.filter_by(user_id=current_user.id, product_id=product.id).first()
+    favorite = Favorite.query.filter_by(
+        user_id=current_user.id,
+        product_id=product.id,
+    ).first()
     if not favorite:
-        DB.session.add(Favorite(user_id=current_user.id, product_id=product.id))
+        DB.session.add(
+            Favorite(user_id=current_user.id, product_id=product.id)
+        )
         DB.session.commit()
         flash("Produto adicionado aos favoritos.", "success")
     else:
@@ -158,14 +216,21 @@ def favoritar(product_id):
 @main.route("/favoritos")
 @login_required
 def favoritos():
-    favorites = Favorite.query.filter_by(user_id=current_user.id).order_by(Favorite.created_at.desc()).all()
+    favorites = (
+        Favorite.query.filter_by(user_id=current_user.id)
+        .order_by(Favorite.created_at.desc())
+        .all()
+    )
     return render_template("favorites.html", favorites=favorites)
 
 
 @main.route("/remover-favorito/<int:product_id>", methods=["POST"])
 @login_required
 def remover_favorito(product_id):
-    favorite = Favorite.query.filter_by(user_id=current_user.id, product_id=product_id).first()
+    favorite = Favorite.query.filter_by(
+        user_id=current_user.id,
+        product_id=product_id,
+    ).first()
     if favorite:
         DB.session.delete(favorite)
         DB.session.commit()
@@ -191,28 +256,62 @@ def adicionar_produto():
 
         market = Market.query.filter_by(name=market_name.title()).first()
         if not market:
-            market = Market(name=market_name.title(), address=address, city=city.title())
+            market = Market(
+                name=market_name.title(),
+                address=address,
+                city=city.title(),
+            )
             DB.session.add(market)
             DB.session.flush()
 
-        product = Product.query.filter_by(name=name.title(), brand=brand.title()).first()
+        product = Product.query.filter_by(
+            name=name.title(),
+            brand=brand.title(),
+        ).first()
         if not product:
-            product = Product(name=name.title(), brand=brand.title(), category=category.title() or "Geral", image_url=image_url or None)
+            product = Product(
+                name=name.title(),
+                brand=brand.title(),
+                category=category.title() or "Geral",
+                image_url=image_url or None,
+            )
             DB.session.add(product)
             DB.session.flush()
 
-        price = Price.query.filter_by(product_id=product.id, market_id=market.id).first()
+        price = Price.query.filter_by(
+            product_id=product.id,
+            market_id=market.id,
+        ).first()
         if not price:
-            price = Price(product_id=product.id, market_id=market.id, price=Decimal(price_value), created_by_id=current_user.id if current_user.is_authenticated else None)
+            price = Price(
+                product_id=product.id,
+                market_id=market.id,
+                price=Decimal(price_value),
+                created_by_id=(
+                    current_user.id
+                    if current_user.is_authenticated
+                    else None
+                ),
+            )
             DB.session.add(price)
             DB.session.flush()
         else:
             price.price = Decimal(price_value)
 
         if current_user.is_authenticated:
-            existing_cadastro = UserCadastro.query.filter_by(user_id=current_user.id, price_id=price.id).first()
+            existing_cadastro = UserCadastro.query.filter_by(
+                user_id=current_user.id,
+                price_id=price.id,
+            ).first()
             if not existing_cadastro:
-                DB.session.add(UserCadastro(user_id=current_user.id, product_id=product.id, market_id=market.id, price_id=price.id))
+                DB.session.add(
+                    UserCadastro(
+                        user_id=current_user.id,
+                        product_id=product.id,
+                        market_id=market.id,
+                        price_id=price.id,
+                    )
+                )
 
         DB.session.commit()
         flash("Produto cadastrado com sucesso.", "success")
@@ -224,14 +323,24 @@ def adicionar_produto():
 @main.route("/meus-cadastros")
 @login_required
 def meus_cadastros():
-    cadastros = UserCadastro.query.filter_by(user_id=current_user.id).order_by(UserCadastro.created_at.desc()).all()
+    cadastros = (
+        UserCadastro.query.filter_by(user_id=current_user.id)
+        .order_by(UserCadastro.created_at.desc())
+        .all()
+    )
     return render_template("cadastros.html", cadastros=cadastros)
 
 
-@main.route("/meus-cadastros/<int:cadastro_id>/editar", methods=["GET", "POST"])
+@main.route(
+    "/meus-cadastros/<int:cadastro_id>/editar",
+    methods=["GET", "POST"],
+)
 @login_required
 def editar_cadastro(cadastro_id):
-    cadastro = UserCadastro.query.filter_by(id=cadastro_id, user_id=current_user.id).first_or_404()
+    cadastro = UserCadastro.query.filter_by(
+        id=cadastro_id,
+        user_id=current_user.id,
+    ).first_or_404()
     price = Price.query.get_or_404(cadastro.price_id)
     product = Product.query.get_or_404(cadastro.product_id)
     market = Market.query.get_or_404(cadastro.market_id)
@@ -239,7 +348,9 @@ def editar_cadastro(cadastro_id):
     if request.method == "POST":
         product.name = request.form.get("name", "").strip().title()
         product.brand = request.form.get("brand", "").strip().title()
-        product.category = request.form.get("category", "").strip().title() or "Geral"
+        product.category = (
+            request.form.get("category", "").strip().title() or "Geral"
+        )
         product.image_url = request.form.get("image_url", "").strip() or None
         market.name = request.form.get("market_name", "").strip().title()
         market.address = request.form.get("address", "").strip()
@@ -249,13 +360,22 @@ def editar_cadastro(cadastro_id):
         flash("Cadastro atualizado com sucesso.", "success")
         return redirect(url_for("main.meus_cadastros"))
 
-    return render_template("edit_cadastro.html", cadastro=cadastro, price=price, product=product, market=market)
+    return render_template(
+        "edit_cadastro.html",
+        cadastro=cadastro,
+        price=price,
+        product=product,
+        market=market,
+    )
 
 
 @main.route("/meus-cadastros/<int:cadastro_id>/excluir", methods=["POST"])
 @login_required
 def excluir_cadastro(cadastro_id):
-    cadastro = UserCadastro.query.filter_by(id=cadastro_id, user_id=current_user.id).first_or_404()
+    cadastro = UserCadastro.query.filter_by(
+        id=cadastro_id,
+        user_id=current_user.id,
+    ).first_or_404()
     DB.session.delete(cadastro)
     DB.session.commit()
     flash("Cadastro removido com sucesso.", "success")
@@ -276,7 +396,11 @@ def login():
         if user and user.check_password(password):
             login_user(user)
             flash("Login realizado com sucesso.", "success")
-            next_page = request.args.get("next") or request.form.get("next") or url_for("main.index")
+            next_page = (
+                request.args.get("next")
+                or request.form.get("next")
+                or url_for("main.index")
+            )
             return redirect(next_page)
         flash("Credenciais inválidas.", "danger")
     return render_template("auth/login.html")

@@ -39,20 +39,49 @@ def test_meus_cadastros_page_renders_with_existing_entry(client):
 
     with app.app_context():
         user = User.query.filter_by(email=email).first()
-        market = Market(name='Mercado Teste', address='Rua A', city='São Paulo')
-        product = Product(name='Produto Teste', brand='Marca Teste', category='Geral')
+        market = Market(
+            name='Mercado Teste',
+            address='Rua A',
+            city='São Paulo',
+        )
+        product = Product(
+            name='Produto Teste',
+            brand='Marca Teste',
+            category='Geral',
+        )
         DB.session.add_all([market, product])
         DB.session.commit()
 
-        price = Price(product_id=product.id, market_id=market.id, price=Decimal('12.50'), created_by_id=user.id)
+        price = Price(
+            product_id=product.id,
+            market_id=market.id,
+            price=Decimal('12.50'),
+            created_by_id=user.id,
+        )
         DB.session.add(price)
         DB.session.commit()
 
-        cadastro = UserCadastro(user_id=user.id, product_id=product.id, market_id=market.id, price_id=price.id)
+        cadastro = UserCadastro(
+            user_id=user.id,
+            product_id=product.id,
+            market_id=market.id,
+            price_id=price.id,
+        )
         DB.session.add(cadastro)
         DB.session.commit()
+
+    client.post('/login', data={
+        'email': email,
+        'password': '123456',
+    }, follow_redirects=True)
 
     response = client.get('/meus-cadastros')
     assert response.status_code == 200
     assert b'Meus cadastros' in response.data
     assert b'Produto Teste' in response.data
+
+
+def test_local_images_are_served(client):
+    response = client.get('/image/agua.jpg')
+    assert response.status_code == 200
+    assert response.mimetype.startswith('image/')
