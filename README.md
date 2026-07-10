@@ -130,4 +130,12 @@ Go to:
 
 ```text
 http://localhost:5000
+```
 
+## Demo Video
+
+Veja o funcionamento do site abaixo:
+
+![MarketCompare demo](video_marketCompare%20(1).gif)
+
+> Caso o GIF não carregue no GitHub, você pode acessar o arquivo diretamente no repositório.
