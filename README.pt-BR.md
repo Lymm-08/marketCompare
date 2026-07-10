@@ -16,7 +16,7 @@ Veja o funcionamento do site abaixo:
 - Flask
 - Flask-SQLAlchemy
 - Flask-Login
-- SQLite (padrão) / MySQL
+- MySQL
 - Bootstrap
 
 ## Estrutura do projeto
@@ -76,13 +76,7 @@ pip install -r requirements.txt
 
 Crie um arquivo .env na raiz do projeto e defina a variável DATABASE_URL.
 
-Se estiver usando SQLite, a configuração padrão já é suficiente:
-
-```env
-DATABASE_URL=sqlite:///marketcompare.db
-```
-
-Se estiver usando MySQL, defina a URL de conexão da seguinte forma:
+Defina a URL de conexão do MySQL da seguinte forma:
 
 ```env
 DATABASE_URL=mysql+pymysql://usuario:senha@localhost:3306/marketcompare
