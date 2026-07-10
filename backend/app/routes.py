@@ -414,6 +414,15 @@ def excluir_cadastro(cadastro_id):
                         DB.session.delete(price)
                 DB.session.commit()
 
+    market = Market.query.get(cadastro.market_id)
+    if market:
+        market_prices = Price.query.filter_by(market_id=market.id).count()
+        market_cadastros = UserCadastro.query.filter_by(market_id=market.id).count()
+        if market_prices == 0 and market_cadastros == 0:
+            if market.name not in seed_data.SEED_MARKET_KEYS:
+                DB.session.delete(market)
+                DB.session.commit()
+
     flash("Cadastro removido com sucesso.", "success")
     return redirect(url_for("main.meus_cadastros"))
 

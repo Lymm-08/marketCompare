@@ -4,6 +4,12 @@
 
 This project uses a manually populated database to demonstrate how the system works. In a future version, prices may be updated automatically through integrations with supermarkets.
 
+## Demo Video
+
+See how the website works below:
+
+![MarketCompare demo](media/demo.gif)
+
 ## Tech Stack
 
 - Python 3.10+
@@ -131,11 +137,3 @@ Go to:
 ```text
 http://localhost:5000
 ```
-
-## Demo Video
-
-Veja o funcionamento do site abaixo:
-
-![MarketCompare demo](media/demo.gif)
-
-> Caso o GIF não carregue no GitHub, você pode acessar o arquivo diretamente no repositório.

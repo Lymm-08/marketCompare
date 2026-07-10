@@ -4,6 +4,12 @@
 
 Este projeto utiliza uma base de dados manual para demonstração do funcionamento do sistema. Em uma versão futura, os preços poderão ser atualizados automaticamente por meio de integrações com supermercados.
 
+## Demo Video
+
+Veja o funcionamento do site abaixo:
+
+![MarketCompare demo](media/demo.gif)
+
 ## Stack
 
 - Python 3.10+

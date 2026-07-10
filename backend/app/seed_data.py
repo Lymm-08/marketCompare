@@ -4,9 +4,11 @@ from . import DB
 from .models import Market, Price, Product
 
 SEED_PRODUCT_KEYS = set()
+SEED_MARKET_KEYS = set()
 
 
 def seed_database():
+    global SEED_MARKET_KEYS
     if Market.query.count() == 0:
         markets = [
             Market(
@@ -42,6 +44,11 @@ def seed_database():
         ]
         DB.session.add_all(markets)
         DB.session.commit()
+
+    SEED_MARKET_KEYS = {
+        market.name
+        for market in Market.query.order_by(Market.id).all()
+    }
 
     products = [
         {
