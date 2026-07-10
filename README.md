@@ -136,6 +136,6 @@ http://localhost:5000
 
 Veja o funcionamento do site abaixo:
 
-![MarketCompare demo](video_marketCompare%20(1).gif)
+![MarketCompare demo](media/demo.gif)
 
 > Caso o GIF não carregue no GitHub, você pode acessar o arquivo diretamente no repositório.
