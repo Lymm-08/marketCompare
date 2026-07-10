@@ -62,4 +62,20 @@ document.addEventListener('DOMContentLoaded', () => {
       applyTheme(button.dataset.theme);
     });
   });
+
+  // Auto-dismiss flash messages placed in the flash container faster
+  document.querySelectorAll('#flash-container .alert, .flash-card .alert').forEach((alert) => {
+    setTimeout(() => {
+      const card = alert.closest('.flash-card');
+      alert.classList.add('fade-out');
+      setTimeout(() => {
+        alert.remove();
+        // if no alerts remain, remove the flash-card to collapse the UI
+        if (card && card.querySelectorAll('.alert').length === 0) {
+          card.classList.add('fade-out');
+          setTimeout(() => card.remove(), 300);
+        }
+      }, 300);
+    }, 1800);
+  });
 });

@@ -1,5 +1,7 @@
+from decimal import Decimal
+
 from . import DB
-from .models import Market, Product
+from .models import Market, Price, Product
 
 
 def seed_database():
@@ -56,7 +58,7 @@ def seed_database():
             "name": "Achocolatado",
             "brand": "3 Corações",
             "category": "Bebidas",
-            "image_url": "/image/achocolatado tres coracoes.jpg",
+            "image_url": "/image/achocolatado tres corações.jpg",
         },
         {
             "name": "Água",
@@ -140,7 +142,7 @@ def seed_database():
             "name": "Café",
             "brand": "Pilão",
             "category": "Bebidas",
-            "image_url": "/image/café pilão.jpg",
+            "image_url": "/image/café pilão.png",
         },
         {
             "name": "Café",
@@ -236,7 +238,7 @@ def seed_database():
             "name": "Iogurte",
             "brand": "Vigor",
             "category": "Laticínios",
-            "image_url": "/image/iorgut vigor.webp",
+            "image_url": "/image/iorgute vigor.webp",
         },
         {
             "name": "Iorgute",
@@ -315,12 +317,6 @@ def seed_database():
             "brand": "Mococa",
             "category": "Laticínios",
             "image_url": "/image/manteiga mococa.jpg",
-        },
-        {
-            "name": "Pão",
-            "brand": "Banco Panco",
-            "category": "Padaria",
-            "image_url": "/image/Pão panco.jpg",
         },
         {
             "name": "Pão",
@@ -455,5 +451,58 @@ def seed_database():
         else:
             product = Product(**payload)
             DB.session.add(product)
+
+    DB.session.commit()
+
+    product_to_remove = Product.query.filter_by(
+        name="Pão",
+        brand="Banco Panco",
+    ).first()
+    if product_to_remove:
+        DB.session.delete(product_to_remove)
+
+    for old_test_product in Product.query.filter_by(name="Produto Teste").all():
+        DB.session.delete(old_test_product)
+
+    for test_market in Market.query.filter(Market.name.ilike("%teste%"), Market.name != "Atacadão").all():
+        DB.session.delete(test_market)
+
+    DB.session.commit()
+
+    default_prices = {
+        "Bebidas": Decimal("10.99"),
+        "Alimentos": Decimal("8.99"),
+        "Snacks": Decimal("6.49"),
+        "Laticínios": Decimal("7.49"),
+        "Padaria": Decimal("5.99"),
+        "Higiene": Decimal("9.49"),
+        "Limpeza": Decimal("7.99"),
+    }
+    default_market = Market.query.filter_by(name="Assaí").first()
+    if default_market is None:
+        default_market = Market.query.first()
+
+    markets = Market.query.order_by(Market.id).all()
+    for product in Product.query.all():
+        base_price = default_prices.get(product.category, Decimal("9.99"))
+        for index, market in enumerate(markets):
+            existing_price = Price.query.filter_by(
+                product_id=product.id,
+                market_id=market.id,
+            ).first()
+            if existing_price:
+                continue
+
+            modifier = Decimal(index) * Decimal("1.45")
+            brand_offset = Decimal(len(product.brand) % 9) * Decimal("0.55")
+            price_value = base_price + modifier + brand_offset
+
+            DB.session.add(
+                Price(
+                    product_id=product.id,
+                    market_id=market.id,
+                    price=price_value,
+                )
+            )
 
     DB.session.commit()

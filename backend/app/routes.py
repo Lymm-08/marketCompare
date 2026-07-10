@@ -13,7 +13,7 @@ from flask import (
     url_for,
 )
 from flask_login import current_user, login_required, login_user, logout_user
-from sqlalchemy import or_
+from sqlalchemy import func, or_
 
 from . import DB, login_manager
 from .config import STATIC_DIR
@@ -89,9 +89,14 @@ def index():
         )
 
     if sort == "menor-preco":
-        products_query = products_query.order_by(Product.name.asc())
+        products_query = (
+            products_query
+            .outerjoin(Product.prices)
+            .group_by(Product.id)
+            .order_by(func.min(Price.price).asc())
+        )
     else:
-        products_query = products_query.order_by(Product.name.desc())
+        products_query = products_query.order_by(Product.name.asc())
 
     pagination = products_query.paginate(
         page=page,
@@ -176,15 +181,22 @@ def compare(product_id):
         Price.query.filter_by(product_id=product_id)
         .join(Market)
         .order_by(Price.price.asc())
-        .limit(3)
         .all()
     )
     if not prices:
         flash("Ainda não há preços cadastrados para este produto.", "warning")
         return redirect(url_for("main.index"))
 
-    cheapest = float(prices[0].price)
-    expensive = float(prices[-1].price)
+    lowest_price_by_market = {}
+    for price in prices:
+        existing = lowest_price_by_market.get(price.market_id)
+        if existing is None or float(price.price) < float(existing.price):
+            lowest_price_by_market[price.market_id] = price
+
+    prices = sorted(lowest_price_by_market.values(), key=lambda p: float(p.price))[:3]
+    all_prices = [float(price.price) for price in prices]
+    cheapest = min(all_prices)
+    expensive = max(all_prices)
     savings = round(expensive - cheapest, 2)
     return render_template(
         "compare.html",
@@ -463,6 +475,11 @@ def recuperar_senha():
         if password != confirm_password:
             flash("As senhas não conferem.", "warning")
             return render_template("auth/reset_password.html")
+        # Do not allow reusing the current password
+        if user.check_password(password):
+            flash("A nova senha não pode ser igual à senha antiga.", "warning")
+            return render_template("auth/reset_password.html")
+
         user.set_password(password)
         DB.session.commit()
         flash("Senha redefinida com sucesso.", "success")
