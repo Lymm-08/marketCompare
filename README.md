@@ -2,7 +2,7 @@
 
 🌎 Language: English | 🇧🇷 [Português](README.pt-BR.md)
 
-This project uses a manually populated database to demonstrate how the system works. In a future version, prices may be updated automatically through integrations with supermarkets.
+This project is a web-based supermarket price comparison system that allows users to find the best deals, calculate savings, and collaboratively add new products.
 
 ## Demo Video
 
