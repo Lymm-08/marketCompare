@@ -3,6 +3,8 @@ from decimal import Decimal
 from . import DB
 from .models import Market, Price, Product
 
+SEED_PRODUCT_KEYS = set()
+
 
 def seed_database():
     if Market.query.count() == 0:
@@ -440,6 +442,12 @@ def seed_database():
         },
     ]
 
+    global SEED_PRODUCT_KEYS
+    SEED_PRODUCT_KEYS = {
+        (payload["name"], payload["brand"])
+        for payload in products
+    }
+
     for payload in products:
         product = Product.query.filter_by(
             name=payload["name"],
@@ -453,6 +461,14 @@ def seed_database():
             DB.session.add(product)
 
     DB.session.commit()
+
+    def get_seed_product_keys():
+        return {
+            (payload["name"], payload["brand"])
+            for payload in products
+        }
+
+    seed_product_keys = get_seed_product_keys()
 
     product_to_remove = Product.query.filter_by(
         name="Pão",
@@ -478,12 +494,20 @@ def seed_database():
         "Higiene": Decimal("9.49"),
         "Limpeza": Decimal("7.99"),
     }
+    seed_product_keys = {
+        (payload["name"], payload["brand"])
+        for payload in products
+    }
+
     default_market = Market.query.filter_by(name="Assaí").first()
     if default_market is None:
         default_market = Market.query.first()
 
     markets = Market.query.order_by(Market.id).all()
     for product in Product.query.all():
+        if (product.name, product.brand) not in seed_product_keys:
+            continue
+
         base_price = default_prices.get(product.category, Decimal("9.99"))
         for index, market in enumerate(markets):
             existing_price = Price.query.filter_by(

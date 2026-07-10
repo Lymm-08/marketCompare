@@ -277,17 +277,19 @@ textarea:focus {
 
 /* Flash container no rodapé central */
 .flash-container {
-  position: fixed;
-  bottom: 1rem;              /* agora no final da tela */
-  left: 50%;                 /* centralizado */
-  transform: translateX(-50%);
-  z-index: 1050;
+  position: static;
+  bottom: auto;
+  left: auto;
+  transform: none;
+  z-index: auto;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  align-items: center;       /* centraliza os cards */
+  align-items: stretch;
   pointer-events: none;
-  max-width: 90%;
+  width: auto;
+  max-width: 100%;
+  margin: 1rem auto;
 }
 
 /* Cartão da mensagem */

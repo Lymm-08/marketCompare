@@ -9,6 +9,7 @@ from .config import STATIC_DIR, TEMPLATE_DIR, get_database_uri
 DB = SQLAlchemy()
 login_manager = LoginManager()
 login_manager.login_view = "main.login"
+login_manager.login_message = ""
 
 
 def create_app():

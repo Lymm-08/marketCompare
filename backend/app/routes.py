@@ -18,6 +18,7 @@ from sqlalchemy import func, or_
 from . import DB, login_manager
 from .config import STATIC_DIR
 from .models import Favorite, Market, Price, Product, User, UserCadastro
+from . import seed_data
 
 main = Blueprint("main", __name__)
 IMAGE_DIR = STATIC_DIR / "js" / "image"
@@ -88,6 +89,8 @@ def index():
             .distinct()
         )
 
+    products_query = products_query.filter(Product.prices.any())
+
     if sort == "menor-preco":
         products_query = (
             products_query
@@ -157,6 +160,7 @@ def api_produtos():
                 Product.category.ilike(like_query),
             )
         )
+    products_query = products_query.filter(Product.prices.any())
     products = products_query.limit(10).all()
     payload = []
     for product in products:
@@ -388,8 +392,28 @@ def excluir_cadastro(cadastro_id):
         id=cadastro_id,
         user_id=current_user.id,
     ).first_or_404()
+    # Keep ids to use after deleting the cadastro
+    price_id = cadastro.price_id
+    product_id = cadastro.product_id
+
     DB.session.delete(cadastro)
     DB.session.commit()
+
+    product = Product.query.get(product_id)
+    if product:
+        remaining_cadastros = UserCadastro.query.filter_by(product_id=product.id).count()
+        if remaining_cadastros == 0:
+            if (product.name, product.brand) not in seed_data.SEED_PRODUCT_KEYS:
+                for price in list(product.prices):
+                    DB.session.delete(price)
+                DB.session.delete(product)
+                DB.session.commit()
+            else:
+                for price in list(product.prices):
+                    if price.created_by_id and UserCadastro.query.filter_by(price_id=price.id).count() == 0:
+                        DB.session.delete(price)
+                DB.session.commit()
+
     flash("Cadastro removido com sucesso.", "success")
     return redirect(url_for("main.meus_cadastros"))
 

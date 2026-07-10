@@ -52,10 +52,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
   overlay.addEventListener('click', closeSidebar);
   document.addEventListener('click', (event) => {
-    if (!sidebar.contains(event.target) && !sidebarToggle.contains(event.target)) {
-      closeSidebar();
+    // guard against missing elements
+    if (sidebar && sidebarToggle) {
+      if (!sidebar.contains(event.target) && !sidebarToggle.contains(event.target)) {
+        closeSidebar();
+      }
     }
   });
+
+  const convertActionLinksToButtons = () => {
+    const selectors = [
+      'a.btn',
+      '.sidebar-nav a',
+      '.topbar-actions a',
+      'a.floating-add-btn',
+    ].join(', ');
+    document.querySelectorAll(selectors).forEach((anchor) => {
+      if (!anchor.href) return;
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = anchor.className;
+      button.id = anchor.id || '';
+      button.setAttribute('aria-label', anchor.getAttribute('aria-label') || '');
+      button.innerHTML = anchor.innerHTML;
+      button.addEventListener('click', () => {
+        window.location.href = anchor.href;
+      });
+      anchor.replaceWith(button);
+    });
+  };
+
+  convertActionLinksToButtons();
 
   themeButtons.forEach((button) => {
     button.addEventListener('click', () => {
@@ -64,18 +91,21 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Auto-dismiss flash messages placed in the flash container faster
-  document.querySelectorAll('#flash-container .alert, .flash-card .alert').forEach((alert) => {
-    setTimeout(() => {
-      const card = alert.closest('.flash-card');
+  const flashAlerts = document.querySelectorAll('#flash-container .alert, .flash-card .alert');
+  flashAlerts.forEach((alert) => {
+    const card = alert.closest('.flash-card');
+    const removeAlert = () => {
       alert.classList.add('fade-out');
       setTimeout(() => {
         alert.remove();
-        // if no alerts remain, remove the flash-card to collapse the UI
         if (card && card.querySelectorAll('.alert').length === 0) {
           card.classList.add('fade-out');
           setTimeout(() => card.remove(), 300);
         }
       }, 300);
-    }, 1800);
+    };
+
+    setTimeout(removeAlert, 1200);
+    alert.addEventListener('click', removeAlert);
   });
 });
