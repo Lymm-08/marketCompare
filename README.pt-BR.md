@@ -2,7 +2,7 @@
 
 🌎 Idioma: Português | 🇺🇸 [English](README.md)
 
-Este projeto utiliza uma base de dados manual para demonstração do funcionamento do sistema. Em uma versão futura, os preços poderão ser atualizados automaticamente por meio de integrações com supermercados.
+MarketCompare é uma aplicação web para comparar preços de produtos e gerenciar itens favoritos. O projeto utiliza um backend em Flask com uma interface simples para demonstrar o fluxo principal de cadastro, comparação e favoritos.
 
 ## Demo Video
 
@@ -16,7 +16,7 @@ Veja o funcionamento do site abaixo:
 - Flask
 - Flask-SQLAlchemy
 - Flask-Login
-- MySQL opcional (SQLite por padrão)
+- SQLite (padrão) / MySQL
 - Bootstrap
 
 ## Estrutura do projeto
@@ -29,33 +29,32 @@ backend/
     config.py
     models.py
     routes.py
+    routes/
     seed_data.py
-frontend/
-  static/
-    css/
-      base.css
-      components.css
-      main.css
-      style.css
-    js/
-      app.js
-  templates/
-    auth/
-    base.html
-    index.html
-    compare.html
-    favorites.html
-    add_product.html
-    cadastros.html
-    edit_cadastro.html
-    etc.
+    templates/
 database/
   marketcompare_mysql.sql
   mysql_setup.py
-  schema.sql
-  seed.sql
+frontend/
+  static/
+    css/
+    js/
+      image/
+  templates/
+    auth/
+    add_product.html
+    base.html
+    cadastros.html
+    compare.html
+    edit_cadastro.html
+    favorites.html
+    index.html
+instance/
+media/
+tests/
+  test_auth.py
 requirements.txt
-.env.example
+.env
 ```
 
 ## Como rodar localmente
@@ -73,20 +72,20 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-### 3) Criar o arquivo .env
+### 3) Configurar o ambiente
 
-Copie o exemplo:
+Crie um arquivo .env na raiz do projeto e defina a variável DATABASE_URL.
 
-```bash
-copy .env.example .env
-```
-
-Se quiser usar SQLite, não precisa alterar nada.
-
-Se quiser usar MySQL, edite o arquivo .env e troque a variável para algo como:
+Se estiver usando SQLite, a configuração padrão já é suficiente:
 
 ```env
-DATABASE_URL=mysql+pymysql://root:senha@localhost:3306/marketcompare
+DATABASE_URL=sqlite:///marketcompare.db
+```
+
+Se estiver usando MySQL, defina a URL de conexão da seguinte forma:
+
+```env
+DATABASE_URL=mysql+pymysql://usuario:senha@localhost:3306/marketcompare
 ```
 
 ## Como criar o banco no MySQL
@@ -104,27 +103,14 @@ CREATE DATABASE marketcompare CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 mysql -u root -p < database/marketcompare_mysql.sql
 ```
 
-Ou abra o arquivo [database/marketcompare_mysql.sql](database/marketcompare_mysql.sql) no seu cliente MySQL e execute todo o conteúdo.
+Também é possível abrir [database/marketcompare_mysql.sql](database/marketcompare_mysql.sql) no seu cliente MySQL e executar o conteúdo.
 
-## Onde editar para conectar ao banco
+## Configuração do banco
+
+A aplicação lê a URL de conexão a partir da variável DATABASE_URL definida no arquivo de ambiente do projeto.
 
 - Arquivo principal de configuração: [backend/app/config.py](backend/app/config.py)
-- Arquivo de ambiente: [.env.example](.env.example)
-- Arquivo real do ambiente: [.env](.env) (crie este arquivo a partir do exemplo)
-
-A aplicação lê a URL de conexão a partir da variável DATABASE_URL.
-
-### Exemplo de configuração MySQL
-
-```env
-DATABASE_URL=mysql+pymysql://usuario:senha@localhost:3306/marketcompare
-```
-
-Substitua:
-- usuario pelo seu usuário do MySQL
-- senha pela sua senha
-- localhost pelo host do seu servidor MySQL, se necessário
-- marketcompare pelo nome do seu banco
+- Arquivo de ambiente: [.env](.env)
 
 ## Executar a aplicação
 
@@ -132,8 +118,8 @@ Substitua:
 python app.py
 ```
 
-Acesse:
+Acesse o seguinte endereço no navegador:
 
 ```text
 http://localhost:5000
-
+```

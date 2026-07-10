@@ -2,7 +2,7 @@
 
 🌎 Language: English | 🇧🇷 [Português](README.pt-BR.md)
 
-This project is a web-based supermarket price comparison system that allows users to find the best deals, calculate savings, and collaboratively add new products.
+This project uses a manually populated database to demonstrate how the system works. In a future version, prices may be updated automatically through integrations with supermarkets.
 
 ## Demo Video
 
@@ -16,7 +16,7 @@ See how the website works below:
 - Flask
 - Flask-SQLAlchemy
 - Flask-Login
-- MySQL (optional; SQLite by default)
+- SQLite (default) / MySQL
 - Bootstrap
 
 ## Project Structure
@@ -29,33 +29,32 @@ backend/
     config.py
     models.py
     routes.py
+    routes/
     seed_data.py
-frontend/
-  static/
-    css/
-      base.css
-      components.css
-      main.css
-      style.css
-    js/
-      app.js
-  templates/
-    auth/
-    base.html
-    index.html
-    compare.html
-    favorites.html
-    add_product.html
-    cadastros.html
-    edit_cadastro.html
-    etc.
+    templates/
 database/
   marketcompare_mysql.sql
   mysql_setup.py
-  schema.sql
-  seed.sql
+frontend/
+  static/
+    css/
+    js/
+      image/
+  templates/
+    auth/
+    add_product.html
+    base.html
+    cadastros.html
+    compare.html
+    edit_cadastro.html
+    favorites.html
+    index.html
+instance/
+media/
+tests/
+  test_auth.py
 requirements.txt
-.env.example
+.env
 ```
 
 ## How to run locally
@@ -73,20 +72,20 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-### 3) Create the .env file
+### 3) Configure the environment
 
-Copy the example:
+Create a .env file in the project root and define the DATABASE_URL variable.
 
-```bash
-copy .env.example .env
-```
-
-If you want to use SQLite, you don’t need to change anything.
-
-If you want to use MySQL, edit the .env file and change the variable to something like:
+If you are using SQLite, the default configuration is already sufficient:
 
 ```env
-DATABASE_URL=mysql+pymysql://root:password@localhost:3306/marketcompare
+DATABASE_URL=sqlite:///marketcompare.db
+```
+
+If you are using MySQL, set the connection URL as follows:
+
+```env
+DATABASE_URL=mysql+pymysql://username:password@localhost:3306/marketcompare
 ```
 
 ## How to create the database in MySQL
@@ -104,27 +103,14 @@ CREATE DATABASE marketcompare CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 mysql -u root -p < database/marketcompare_mysql.sql
 ```
 
-Or open the [database/marketcompare_mysql.sql](database/marketcompare_mysql.sql) file in your MySQL client and execute the entire contents.
+You can also open [database/marketcompare_mysql.sql](database/marketcompare_mysql.sql) in your MySQL client and execute its contents.
 
-## Where to edit to connect to the database
+## Database configuration
+
+The application reads the connection URL from the DATABASE_URL variable defined in the project environment file.
 
 - Main configuration file: [backend/app/config.py](backend/app/config.py)
-- Environment file: [.env.example](.env.example)
-- Actual environment file: [.env](.env) (create this file based on the example)
-
-The application reads the connection URL from the DATABASE_URL variable.
-
-### Example MySQL configuration
-
-```env
-DATABASE_URL=mysql+pymysql://username:password@localhost:3306/marketcompare
-```
-
-Replace:
-- username with your MySQL username
-- password with your password
-- localhost with your MySQL server’s hostname, if necessary
-- marketcompare with the name of your database
+- Environment file: [.env](.env)
 
 ## Run the application
 
@@ -132,7 +118,7 @@ Replace:
 python app.py
 ```
 
-Go to:
+Open the following address in your browser:
 
 ```text
 http://localhost:5000
