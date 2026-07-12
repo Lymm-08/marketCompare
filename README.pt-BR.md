@@ -8,7 +8,7 @@ MarketCompare é uma aplicação web para comparar preços de produtos e gerenci
 
 Veja o funcionamento do site abaixo:
 
-![MarketCompare demo](/video_marketCompare.gif)
+![MarketCompare demo](media/vd_original_marketCompare.gif)
 
 ## Stack
 

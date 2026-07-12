@@ -8,7 +8,7 @@ This project uses a manually populated database to demonstrate how the system wo
 
 See how the website works below:
 
-![MarketCompare demo](/video_marketCompare.gif)
+![MarketCompare demo](media/vd_original_marketCompare.gif)
 
 ## Tech Stack
 
